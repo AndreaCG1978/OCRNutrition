@@ -1,15 +1,12 @@
 package com.android.knapps.ocrnutrition;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,21 +14,27 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.graphics.Point;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+import com.squareup.picasso.Picasso;
+
+public class MainActivity extends Activity {
 
     private final int PERMISSIONS_WRITE_STORAGE = 101;
     private TessOCR mTessOCR = null;
     String valor = null;
+    ImageView iv = null;
+    TextView txt = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        iv = findViewById(R.id.imageView);
+        txt = findViewById(R.id.texto);
         //loadWithOCR();
         askForWriteStoragePermission();
 
@@ -46,11 +49,16 @@ public class MainActivity extends AppCompatActivity {
             drawable = (DrawableCompat.wrap(drawable)).mutate();
         }*/
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
 
-    /*    Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+     //  Picasso.get().load(R.drawable.etiqueta1).into(iv);
+
+
+       Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
+
+      /*  Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                 drawable.getIntrinsicHeight(), Bitmap.Config.RGB_565);*/
         doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+
     }
 
 
@@ -114,32 +122,47 @@ public class MainActivity extends AppCompatActivity {
 
     ProgressDialog mProgressDialog = null;
     Activity ocrView= null;
-    private void doOCR (final Bitmap bitmap) {
 
-      /*  if (mProgressDialog == null) {
-            mProgressDialog = ProgressDialog.show(ocrView, "Processing",
+    private void doOCR(final Bitmap bitmap) {
+        if (mProgressDialog == null) {
+            mProgressDialog = ProgressDialog.show(this, "Processing",
                     "Doing OCR...", true);
         } else {
             mProgressDialog.show();
-        }*/
+        }
         new Thread(new Runnable() {
             public void run() {
-
-
                 final String srcText = mTessOCR.getOCRResult(bitmap);
-                valor = srcText;
-           /*     ocrView.runOnUiThread(new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        // TODO Auto-generated method stub
+
                         if (srcText != null && !srcText.equals("")) {
-                            //srcText contiene el texto reconocido
+                            txt.setText(srcText);
                         }
-                        mTessOCR.onDestroy();
                         mProgressDialog.dismiss();
                     }
-                });*/
+                });
             }
         }).start();
     }
+
+/*    private void doOCR (final Bitmap bitmap) {
+        new Thread(new Runnable() {
+            public void run() {
+            final String srcText = mTessOCR.getOCRResult(bitmap);
+                valor = srcText;
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (srcText != null && !srcText.equals("")) {
+                            txt.setText(srcText);
+                        }
+                    }
+                });
+            }
+        }).start();
+    }*/
 }
