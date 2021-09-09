@@ -7,6 +7,8 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,20 +16,31 @@ import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
-public class MainActivity extends Activity {
+import java.io.File;
+
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private final int PERMISSIONS_WRITE_STORAGE = 101;
+    private final int PERMISSIONS_CAMERA = 102;
     private TessOCR mTessOCR = null;
     String valor = null;
     ImageView iv = null;
     TextView txt = null;
+    final int CAMERA_CAPTURE = 1;
+    final int CROP_PIC = 2;
+    private Uri picUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +48,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         iv = findViewById(R.id.imageView);
         txt = findViewById(R.id.texto);
+        Button captureBtn = (Button) findViewById(R.id.capture_btn);
+        captureBtn.setOnClickListener(this);
         //loadWithOCR();
         askForWriteStoragePermission();
 
@@ -55,12 +70,77 @@ public class MainActivity extends Activity {
 
        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
 
-      /*  Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
-                drawable.getIntrinsicHeight(), Bitmap.Config.RGB_565);*/
-        doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+       // doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
 
     }
 
+    private void performCrop() {
+        // take care of exceptions
+        try {
+            // call the standard crop action intent (the user device may not
+            // support it)
+            Intent cropIntent = new Intent("com.android.camera.action.CROP");
+            // indicate image type and Uri
+            cropIntent.setDataAndType(picUri, "image/*");
+            // set crop properties
+            cropIntent.putExtra("crop", "true");
+            // indicate aspect of desired crop
+            cropIntent.putExtra("aspectX", 2);
+            cropIntent.putExtra("aspectY", 1);
+            // indicate output X and Y
+            cropIntent.putExtra("outputX", 256);
+            cropIntent.putExtra("outputY", 256);
+            // retrieve data on return
+            cropIntent.putExtra("return-data", true);
+            // start the activity - we handle returning in onActivityResult
+            startActivityForResult(cropIntent, CROP_PIC);
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            Toast toast = Toast
+                    .makeText(this, "This device doesn't support the crop action!", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+    }
+
+    Uri outFileUri = null;
+
+    public void onClick(View v) {
+        if (v.getId() == R.id.capture_btn) {
+            try {
+                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(captureIntent, CAMERA_CAPTURE);
+            } catch (ActivityNotFoundException anfe) {
+                Toast toast = Toast.makeText(this, "This device doesn't support the crop action!",
+                        Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == CAMERA_CAPTURE) {
+                // get the Uri for the captured image
+                picUri = data.getData();
+
+
+
+
+
+                performCrop();
+            }
+            // user is returning from cropping the image
+            else if (requestCode == CROP_PIC) {
+                // get the returned data
+                Bundle extras = data.getExtras();
+                // get the cropped bitmap
+                Bitmap thePic = extras.getParcelable("data");
+                ImageView picView = (ImageView) findViewById(R.id.imageView);
+                picView.setImageBitmap(thePic);
+            }
+        }
+    }
 
     private Bitmap convertColorIntoBlackAndWhiteImage(Bitmap orginalBitmap) {
         ColorMatrix colorMatrix = new ColorMatrix();
@@ -110,9 +190,17 @@ public class MainActivity extends Activity {
                         PERMISSIONS_WRITE_STORAGE);
 
 
-            } else {//Ya tiene el permiso...
-                this.loadWithOCR();
             }
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA},
+                        PERMISSIONS_CAMERA);
+
+
+            }/*else {//Ya tiene el permiso...
+                this.loadWithOCR();
+            }*/
         } else {
             this.loadWithOCR();
         }
