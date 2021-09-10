@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.view.View;
@@ -35,6 +36,8 @@ import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -61,7 +64,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         captureBtn.setOnClickListener(this);
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-        //loadWithOCR();
+        loadWithOCR();
         askForWriteStoragePermission();
 
     }
@@ -79,7 +82,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
      //  Picasso.get().load(R.drawable.etiqueta1).into(iv);
 
 
-       Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
+    //   Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
 
        // doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
 
@@ -137,9 +140,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 
 
-            CropImage.activity()
-                    .setGuidelines(CropImageView.Guidelines.ON)
+            CropImage.activity(picUri)
                     .start(this);
+
 
         }
         // respond to users whose devices do not support the crop action
@@ -155,13 +158,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.capture_btn) {
             try {
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //Uri uri  = Uri.parse("file:///sdcard/photo.jpg");
+               Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Uri uri  = Uri.parse("file:///sdcard/photo.jpg");
 
 
-                //captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, file);
+                captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 
                 startActivityForResult(captureIntent, CAMERA_CAPTURE);
+
             } catch (ActivityNotFoundException anfe) {
                 Toast toast = Toast.makeText(this, "This device doesn't support the crop action!",
                         Toast.LENGTH_SHORT);
@@ -184,10 +188,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK) {
+
             if (requestCode == CAMERA_CAPTURE) {
                 // get the Uri for the captured image
-                picUri = data.getData();
+
 
             //    Uri file = Uri.fromFile(getOutputMediaFile());
 
@@ -195,38 +199,50 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 performCrop();
             }
+        // handle result of pick image chooser
+        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)
+        {
+            Uri imageUri = CropImage.getPickImageResultUri(this, data);
+
+            // For API >= 23 we need to check specifically that we have permissions to read external storage.
+            if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri))
+            {
+
+            }
+            else
+            {
+                // no permissions required or already grunted, can start crop image activity
+                performCrop();
+            }
+        }
             // user is returning from cropping the image
 
             if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
                 CropImage.ActivityResult result = CropImage.getActivityResult(data);
                 if (resultCode == RESULT_OK) {
                     Uri resultUri = result.getUri();
+                    try {
+                        Bitmap bitmap = this.getBitmapFromUri(resultUri);
+                        doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
                     Exception error = result.getError();
                 }
             }
 
 
-            if (requestCode == CROP_PIC) {
-                // get the returned data
-                Bundle extras = data.getExtras();
-                Bitmap bmp = null;
-                if (extras != null) {
-                    bmp = extras.getParcelable("data");
 
 
-                }
-                File f = new File(picUri.getPath());
+    }
 
-
-                /*
-                Bundle extras = data.getExtras();
-                // get the cropped bitmap
-                Bitmap thePic = extras.getParcelable("data");
-                ImageView picView = (ImageView) findViewById(R.id.imageView);
-                picView.setImageBitmap(thePic);*/
-            }
-        }
+    private Bitmap getBitmapFromUri(Uri uri) throws IOException {
+        ParcelFileDescriptor parcelFileDescriptor = this.getContentResolver().openFileDescriptor(uri, "r");
+        FileDescriptor fileDescriptor = parcelFileDescriptor.getFileDescriptor();
+        Bitmap image = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+        parcelFileDescriptor.close();
+        return image;
     }
 
     private Bitmap convertColorIntoBlackAndWhiteImage(Bitmap orginalBitmap) {
