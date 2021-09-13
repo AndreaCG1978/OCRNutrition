@@ -3,12 +3,14 @@ package com.android.knapps.ocrnutrition;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -34,6 +36,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
+import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -88,61 +91,100 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (requestCode == CAMERA_CAPTURE) {
+            // get the Uri for the captured image
+
+
+            //    Uri file = Uri.fromFile(getOutputMediaFile());
+
+           // picUri = Uri.fromFile(getOutputMediaFile());
+
+
+      //      File file = new File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg");
+
+            //Uri of camera image
+   //         picUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);
+            Bitmap bitmap = null;
+            try {
+                bitmap = this.getBitmapFromUri(picUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+            performCrop();
+        }
+        // handle result of pick image chooser
+        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE )
+        {
+            Uri imageUri = CropImage.getPickImageResultUri(this, data);
+
+            // For API >= 23 we need to check specifically that we have permissions to read external storage.
+            if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri))
+            {
+
+            }
+            else
+            {
+                // no permissions required or already grunted, can start crop image activity
+                performCrop();
+                //     CropImage.
+            }
+        }
+
+/*
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+                CropImage.ActivityResult result = CropImage.getActivityResult(data);
+                if (resultCode == RESULT_OK) {
+                    Uri resultUri = result.getUri();
+                    try {
+                        Bitmap bitmap = this.getBitmapFromUri(resultUri);
+                        doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                    Exception error = result.getError();
+                }
+            }
+*/
+     /*   if(requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE){
+            data.toString();
+        }
+*/
+        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            final Uri resultUri = UCrop.getOutput(data);
+        } else if (resultCode == UCrop.RESULT_ERROR) {
+            final Throwable cropError = UCrop.getError(data);
+        }
+
+
+    }
+
+
     private void performCrop() {
         // take care of exceptions
         try {
             // call the standard crop action intent (the user device may not
-          /*  // support it)
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
-            // indicate image type and Uri
-            cropIntent.setDataAndType(picUri, "image/*");
-            // set crop properties
-            cropIntent.putExtra("crop", "true");
-            // indicate aspect of desired crop
-            cropIntent.putExtra("aspectX", 2);
-            cropIntent.putExtra("aspectY", 1);
-            // indicate output X and Y
-            cropIntent.putExtra("outputX", 256);
-            cropIntent.putExtra("outputY", 256);
-            // retrieve data on return
-            cropIntent.putExtra("return-data", true);
-            // start the activity - we handle returning in onActivityResult
-            startActivityForResult(cropIntent, CROP_PIC);*/
-/*
-            Intent intent = new Intent("com.android.camera.action.CROP");
-            intent.setType("image/*");
-            List<ResolveInfo> list = getPackageManager().queryIntentActivities( intent, 0 );
-            int size = list.size();
-            if (size == 0) {
-                Toast.makeText(this, "Can not find image crop app", Toast.LENGTH_SHORT).show();
-
-                return;
-            } else {
-                intent.setData(picUri);
-                intent.putExtra("outputX", 300);
-                intent.putExtra("outputY", 300);
-                intent.putExtra("aspectX", 1);
-                intent.putExtra("aspectY", 1);
-                intent.putExtra("scale", true);
-                intent.putExtra("return-data", true);
-                if (size == 1) {
-                    Intent i        = new Intent(intent);
-                    ResolveInfo res = list.get(0);
-
-                    i.setComponent( new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-
-                    startActivityForResult(i, CROP_PIC);
-                } else {
-
-                }
-
-            }*/
 
 
 
-            CropImage.activity(picUri)
+      //      CropImage.activity(Uri.fromFile(new File(picUri.getPath()))).start(this);
+       //     CropImage.startPickImageActivity(this);
+
+            Uri destinationUri = Uri.fromFile(new File(this.getCacheDir(), "IMG_" + System.currentTimeMillis()));
+
+            UCrop.of(picUri, destinationUri)
+                    .withMaxResultSize(1080, 768) // any resolution you want
                     .start(this);
 
+        /*    UCrop.of(null, destinationUri)
+                    .withAspectRatio(16, 9)
+                    .withMaxResultSize(200, 200)
+                    .start(this);
+*/
 
         }
         // respond to users whose devices do not support the crop action
@@ -158,13 +200,51 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         if (v.getId() == R.id.capture_btn) {
             try {
-               Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                Uri uri  = Uri.parse("file:///sdcard/photo.jpg");
 
+               // Uri uri  = null;
 
+/*              Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                 Uri uri  = Uri.parse("file:///sdcard/photo.jpg");
                 captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
 
                 startActivityForResult(captureIntent, CAMERA_CAPTURE);
+
+*/
+
+/*
+                picUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                        new ContentValues());
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, picUri);
+                startActivityForResult(intent,CAMERA_CAPTURE);
+
+*/
+
+                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                picUri  = Uri.parse("file:///sdcard/photo.jpg");
+                captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, picUri);
+
+                startActivityForResult(captureIntent, CAMERA_CAPTURE);
+
+
+/*
+                Intent m_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File file = new File(Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_PICTURES), "IMG_FOLDER");
+                Uri uri = Uri.fromFile(new File(file.getPath() + File.separator +
+                        "profile_img.jpg"));
+                m_intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(m_intent, CAMERA_CAPTURE);
+*/
+                /*Intent m_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                File file = new File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg");
+                Uri uri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);
+                m_intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+                startActivityForResult(m_intent, CAMERA_CAPTURE);*/
+
+
+            //  performCrop();
+
 
             } catch (ActivityNotFoundException anfe) {
                 Toast toast = Toast.makeText(this, "This device doesn't support the crop action!",
@@ -187,55 +267,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 "IMG_"+ timeStamp + ".jpg");
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-            if (requestCode == CAMERA_CAPTURE) {
-                // get the Uri for the captured image
-
-
-            //    Uri file = Uri.fromFile(getOutputMediaFile());
-
-                picUri = Uri.fromFile(getOutputMediaFile());
-
-                performCrop();
-            }
-        // handle result of pick image chooser
-        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE && resultCode == Activity.RESULT_OK)
-        {
-            Uri imageUri = CropImage.getPickImageResultUri(this, data);
-
-            // For API >= 23 we need to check specifically that we have permissions to read external storage.
-            if (CropImage.isReadExternalStoragePermissionsRequired(this, imageUri))
-            {
-
-            }
-            else
-            {
-                // no permissions required or already grunted, can start crop image activity
-                performCrop();
-            }
-        }
-            // user is returning from cropping the image
-
-            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
-                CropImage.ActivityResult result = CropImage.getActivityResult(data);
-                if (resultCode == RESULT_OK) {
-                    Uri resultUri = result.getUri();
-                    try {
-                        Bitmap bitmap = this.getBitmapFromUri(resultUri);
-                        doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-                    Exception error = result.getError();
-                }
-            }
-
-
-
-
-    }
 
     private Bitmap getBitmapFromUri(Uri uri) throws IOException {
         ParcelFileDescriptor parcelFileDescriptor = this.getContentResolver().openFileDescriptor(uri, "r");
