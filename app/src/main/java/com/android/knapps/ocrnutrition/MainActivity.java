@@ -106,13 +106,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             //Uri of camera image
    //         picUri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);
-            Bitmap bitmap = null;
+          /*  Bitmap bitmap = null;
             try {
                 bitmap = this.getBitmapFromUri(picUri);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+*/
 
             performCrop();
         }
@@ -156,6 +156,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
 */
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             final Uri resultUri = UCrop.getOutput(data);
+            Bitmap bitmap = null;
+            try {
+                bitmap = this.getBitmapFromUri(resultUri);
+                doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         } else if (resultCode == UCrop.RESULT_ERROR) {
             final Throwable cropError = UCrop.getError(data);
         }
@@ -361,6 +369,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                         if (srcText != null && !srcText.equals("")) {
                             txt.setText(srcText);
+                            iv.setImageBitmap(bitmap);
                         }
                         mProgressDialog.dismiss();
                     }
