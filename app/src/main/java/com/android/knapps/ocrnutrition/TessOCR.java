@@ -3,6 +3,7 @@ package com.android.knapps.ocrnutrition;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
@@ -22,17 +23,19 @@ public class TessOCR {
     public Context context;
 
 
-    public static final String DATA_PATH = Environment
-            .getExternalStorageDirectory().toString() + "/ocrctz/";
-    public static final String lang = "eng";
+  //  public static final String DATA_PATH = Environment.getExternalStorageDirectory().toString() + "/ocrctz/";
+    public static final String lang = "spa";
 
     private static final String TAG = "OCR";
 
     public TessOCR(Context context, String language) {
-        String[] paths = new String[] { DATA_PATH, DATA_PATH + "tessdata/" };
+        datapath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString() + "/ocrctz/";
+
+        String[] paths = new String[] { datapath, datapath + "tessdata/" };
         mTess = new TessBaseAPI();
         this.context = context;
-        datapath = Environment.getExternalStorageDirectory() + "/ocrctz";
+
+    //    datapath = Environment.getExternalStorageDirectory() + "/ocrctz";
 
         for (String path : paths) {
             File dir = new File(path);
@@ -58,10 +61,10 @@ public class TessOCR {
 */
         AssetManager assetManager = context.getAssets();
 
-        if (!(new File(DATA_PATH + "tessdata/" + lang + ".traineddata")).exists()) {
+        if (!(new File(datapath + "tessdata/" + lang + ".traineddata")).exists()) {
             try {
                 InputStream in = assetManager.open("tessdata/" + lang + ".traineddata");
-                OutputStream out = new FileOutputStream(DATA_PATH
+                OutputStream out = new FileOutputStream(datapath
                         + "tessdata/" + lang + ".traineddata");
 
                 byte[] buf = new byte[1024];
@@ -79,7 +82,7 @@ public class TessOCR {
         }
 
         mTess.setDebug(true);
-        mTess.init(DATA_PATH, lang);
+        mTess.init(datapath, lang);
 
         /*
         mTess = new TessBaseAPI();
@@ -99,8 +102,8 @@ public class TessOCR {
         AssetManager assetManager = context.getAssets();
         try
         {
-            InputStream in = assetManager.open("eng.traineddata");
-            OutputStream out = new FileOutputStream(datapath + "tessdata/" + "eng.traineddata");
+            InputStream in = assetManager.open("spa.traineddata");
+            OutputStream out = new FileOutputStream(datapath + "tessdata/" + "spa.traineddata");
             byte[] buffer = new byte[1024];
             int read = in.read(buffer);
             while (read != -1) {
@@ -127,7 +130,14 @@ public class TessOCR {
     public String getOCRResult(Bitmap bitmap)
     {
         mTess.setImage(bitmap);
-        String detected = mTess.getUTF8Text();
+        String detected = null;
+        try
+        {
+            detected = mTess.getUTF8Text();
+        } catch (Exception e)
+        {
+            Log.d("mylog", "couldn't copy with the following error : "+e.toString());
+        }
         return detected;
     }
 

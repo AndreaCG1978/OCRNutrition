@@ -33,9 +33,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -117,7 +114,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             performCrop();
         }
         // handle result of pick image chooser
-        if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE )
+      /*  if (requestCode == CropImage.PICK_IMAGE_CHOOSER_REQUEST_CODE )
         {
             Uri imageUri = CropImage.getPickImageResultUri(this, data);
 
@@ -132,7 +129,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 performCrop();
                 //     CropImage.
             }
-        }
+        }*/
 
 /*
             if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -159,6 +156,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             Bitmap bitmap = null;
             try {
                 bitmap = this.getBitmapFromUri(resultUri);
+           //     bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
                 doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
             } catch (IOException e) {
                 e.printStackTrace();
@@ -228,11 +226,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 */
 
-                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                // ESTO ES LA POSTA
+
+           /*     Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 picUri  = Uri.parse("file:///sdcard/photo.jpg");
                 captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, picUri);
 
                 startActivityForResult(captureIntent, CAMERA_CAPTURE);
+
+*/
+
+
+
+                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
+                doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
 
 
 /*
@@ -299,8 +306,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         Canvas canvas = new Canvas(blackAndWhiteBitmap);
         canvas.drawBitmap(blackAndWhiteBitmap, 0, 0, paint);
-
-        return blackAndWhiteBitmap;
+       // return blackAndWhiteBitmap.copy(Bitmap.Config.ARGB_8888, true);
+       return blackAndWhiteBitmap;
     }
 
     @Override
@@ -362,6 +369,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         new Thread(new Runnable() {
             public void run() {
+
                 final String srcText = mTessOCR.getOCRResult(bitmap);
                 runOnUiThread(new Runnable() {
                     @Override
