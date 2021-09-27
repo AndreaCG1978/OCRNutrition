@@ -33,6 +33,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.mlkit.vision.common.InputImage;
+import com.google.mlkit.vision.text.Text;
+import com.google.mlkit.vision.text.TextRecognition;
+import com.google.mlkit.vision.text.TextRecognizer;
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -70,7 +78,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void loadWithOCR(){
-        mTessOCR = new TessOCR(this,"eng");
+     //   mTessOCR = new TessOCR(this,"eng");
         // mTessOCR.doOCR(bitmap);
 
        /* Drawable drawable = ContextCompat.getDrawable(this, R.drawable.etiqueta3);
@@ -207,24 +215,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (v.getId() == R.id.capture_btn) {
             try {
 
-               // Uri uri  = null;
 
-/*              Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                 Uri uri  = Uri.parse("file:///sdcard/photo.jpg");
-                captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-
-                startActivityForResult(captureIntent, CAMERA_CAPTURE);
-
-*/
-
-/*
-                picUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                        new ContentValues());
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, picUri);
-                startActivityForResult(intent,CAMERA_CAPTURE);
-
-*/
 
                 // ESTO ES LA POSTA
 
@@ -236,29 +227,34 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 */
 
-
-
+                TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
                 Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
-                doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+                InputImage image = InputImage.fromBitmap(bitmap, 0);
+                Task<Text> result =
+                        recognizer.process(image)
+                                .addOnSuccessListener(new OnSuccessListener<Text>() {
+                                    @Override
+                                    public void onSuccess(Text visionText) {
+                                        // Task completed successfully
+                                        // ...
+                                        visionText.toString();
+                                    }
+                                })
+                                .addOnFailureListener(
+                                        new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                // Task failed with an exception
+                                                // ...
+                                                e.printStackTrace();
+                                            }
+                                        });
 
 
-/*
-                Intent m_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File file = new File(Environment.getExternalStoragePublicDirectory(
-                        Environment.DIRECTORY_PICTURES), "IMG_FOLDER");
-                Uri uri = Uri.fromFile(new File(file.getPath() + File.separator +
-                        "profile_img.jpg"));
-                m_intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(m_intent, CAMERA_CAPTURE);
-*/
-                /*Intent m_intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File file = new File(Environment.getExternalStorageDirectory(), "MyPhoto.jpg");
-                Uri uri = FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", file);
-                m_intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
-                startActivityForResult(m_intent, CAMERA_CAPTURE);*/
+          //      doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
 
 
-            //  performCrop();
+
 
 
             } catch (ActivityNotFoundException anfe) {
