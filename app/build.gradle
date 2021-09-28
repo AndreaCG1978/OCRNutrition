@@ -31,8 +31,8 @@ android {
 dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
-    implementation 'com.rmtheis:tess-two:9.1.+'
     implementation 'com.github.yalantis:ucrop:2.2.6'
+    implementation 'com.google.android.gms:play-services-mlkit-text-recognition:17.0.0'
 
 
 

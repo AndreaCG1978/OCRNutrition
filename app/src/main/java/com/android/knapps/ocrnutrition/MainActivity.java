@@ -54,13 +54,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     private final int PERMISSIONS_WRITE_STORAGE = 101;
     private final int PERMISSIONS_CAMERA = 102;
-    private TessOCR mTessOCR = null;
     String valor = null;
     ImageView iv = null;
     TextView txt = null;
     final int CAMERA_CAPTURE = 1;
     final int CROP_PIC = 2;
     private Uri picUri;
+    TextRecognizer recognizer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +72,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         captureBtn.setOnClickListener(this);
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
-        loadWithOCR();
+        recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
+
         askForWriteStoragePermission();
+
 
     }
 
@@ -227,28 +229,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 */
 
-                TextRecognizer recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS);
-                Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
-                InputImage image = InputImage.fromBitmap(bitmap, 0);
-                Task<Text> result =
-                        recognizer.process(image)
-                                .addOnSuccessListener(new OnSuccessListener<Text>() {
-                                    @Override
-                                    public void onSuccess(Text visionText) {
-                                        // Task completed successfully
-                                        // ...
-                                        visionText.toString();
-                                    }
-                                })
-                                .addOnFailureListener(
-                                        new OnFailureListener() {
-                                            @Override
-                                            public void onFailure(@NonNull Exception e) {
-                                                // Task failed with an exception
-                                                // ...
-                                                e.printStackTrace();
-                                            }
-                                        });
+
 
 
           //      doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
@@ -363,7 +344,32 @@ public class MainActivity extends Activity implements View.OnClickListener {
         } else {
             mProgressDialog.show();
         }
-        new Thread(new Runnable() {
+
+        final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        Task<Text> result =
+                recognizer.process(image)
+                        .addOnSuccessListener(new OnSuccessListener<Text>() {
+                            @Override
+                            public void onSuccess(Text visionText) {
+                                // Task completed successfully
+                                // ...
+                                txt.setText(visionText.getText());
+                                iv.setImageBitmap(bitmap1);
+                            }
+                        })
+                        .addOnFailureListener(
+                                new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        // Task failed with an exception
+                                        // ...
+                                        e.printStackTrace();
+                                    }
+                                });
+
+
+        /*new Thread(new Runnable() {
             public void run() {
 
                 final String srcText = mTessOCR.getOCRResult(bitmap);
@@ -379,7 +385,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     }
                 });
             }
-        }).start();
+        }).start();*/
     }
 
 /*    private void doOCR (final Bitmap bitmap) {
