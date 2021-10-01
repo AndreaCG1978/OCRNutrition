@@ -221,18 +221,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
                 // ESTO ES LA POSTA
 
-           /*     Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 picUri  = Uri.parse("file:///sdcard/photo.jpg");
                 captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, picUri);
 
                 startActivityForResult(captureIntent, CAMERA_CAPTURE);
-
-*/
-
-
-
-
-          //      doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
+         //       doOCR(convertColorIntoBlackAndWhiteImage(bitmap));
 
 
 
@@ -307,30 +301,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
+    int ALL_PERMISSIONS = 101;
+
     private void askForWriteStoragePermission() {
+
+
+
+        final String[] permissions = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        PERMISSIONS_WRITE_STORAGE);
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, permissions, ALL_PERMISSIONS);
 
 
             }
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                    != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.CAMERA},
-                        PERMISSIONS_CAMERA);
-
-
-            }/*else {//Ya tiene el permiso...
-                this.loadWithOCR();
-            }*/
-        } else {
-            this.loadWithOCR();
         }
-
 
     }
 
@@ -346,7 +333,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
 
         final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
-        InputImage image = InputImage.fromBitmap(bitmap, 0);
+        InputImage image = InputImage.fromBitmap(bitmap1, 0);
         Task<Text> result =
                 recognizer.process(image)
                         .addOnSuccessListener(new OnSuccessListener<Text>() {
@@ -356,6 +343,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 // ...
                                 txt.setText(visionText.getText());
                                 iv.setImageBitmap(bitmap1);
+                                mProgressDialog.dismiss();
                             }
                         })
                         .addOnFailureListener(
