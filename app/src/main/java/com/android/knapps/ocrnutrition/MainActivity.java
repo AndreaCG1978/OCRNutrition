@@ -334,8 +334,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mProgressDialog.show();
         }
 
-        final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
-        InputImage image = InputImage.fromBitmap(bitmap1, 0);
+      /*  final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
+        InputImage image = InputImage.fromBitmap(bitmap1, 0);*/
+        InputImage image = InputImage.fromBitmap(bitmap, 0);
         Task<Text> result =
                 recognizer.process(image)
                         .addOnSuccessListener(new OnSuccessListener<Text>() {
@@ -343,8 +344,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             public void onSuccess(Text visionText) {
                                 // Task completed successfully
                                 // ...
-                                txt.setText(visionText.getText());
-                                iv.setImageBitmap(bitmap1);
+                                String temp = visionText.getText();
+                                temp = temp.replace("\n", "");
+                                txt.setText(temp);
+                                iv.setImageBitmap(bitmap);
                                 mProgressDialog.dismiss();
                             }
                         })
