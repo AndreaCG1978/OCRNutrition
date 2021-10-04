@@ -222,6 +222,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 // ESTO ES LA POSTA
 
                 Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).toString();
+
                 picUri  = Uri.parse("file:///sdcard/photo.jpg");
                 captureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, picUri);
 
