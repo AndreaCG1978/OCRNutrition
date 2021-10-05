@@ -334,9 +334,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
             mProgressDialog.show();
         }
 
-      /*  final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
-        InputImage image = InputImage.fromBitmap(bitmap1, 0);*/
+      //  final Bitmap bitmap1 = BitmapFactory.decodeResource(getResources(), R.drawable.etiqueta1);
         InputImage image = InputImage.fromBitmap(bitmap, 0);
+     //   InputImage image = InputImage.fromBitmap(bitmap1, 0);
         Task<Text> result =
                 recognizer.process(image)
                         .addOnSuccessListener(new OnSuccessListener<Text>() {
@@ -349,6 +349,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 txt.setText(temp);
                                 iv.setImageBitmap(bitmap);
                                 mProgressDialog.dismiss();
+
                             }
                         })
                         .addOnFailureListener(
@@ -358,6 +359,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                         // Task failed with an exception
                                         // ...
                                         e.printStackTrace();
+                                        mProgressDialog.dismiss();
                                     }
                                 });
 
