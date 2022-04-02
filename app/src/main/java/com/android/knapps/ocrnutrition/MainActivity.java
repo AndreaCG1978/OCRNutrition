@@ -407,16 +407,45 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
+    private boolean procesarComponente(String texto, String label, TextView view){
+        int pos = -1;
+        String subString = "";
+        String caracter = "";
+        boolean exito = true;
+        //label = this.getResources().getString(R.string.proteinas1);
+        pos = texto.indexOf(label);
+        if(pos == -1){
+            view.setText(label + ": no contiene");
+            exito = false;
+        }else{
+            pos = pos + label.length();
+            caracter = texto.substring(pos, pos + 1);
+            while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+                subString = subString + caracter;
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            view.setText(label + ": " + subString + " gramos");
+        }
+        return exito;
+    }
 
-        private void parsearTexto(MainActivity mainActivity, String temp) {
+
+    private void parsearTexto(MainActivity mainActivity, String temp) {
         String texto = temp.toUpperCase();
         String subString = "";
         String caracter = "";
         int pos = -1;
-        boolean iterar = true;
+        boolean exito = true;
 
         // PROCESO CARBOHIDRATOS
-        String label = this.getResources().getString(R.string.carbohidratos);
+        this.procesarComponente(texto, this.getResources().getString(R.string.carbohidratos), textoCarbohidratos);
+
+        /*String label = this.getResources().getString(R.string.carbohidratos);
         pos = texto.indexOf(label);
         pos = pos + label.length();
 
@@ -431,8 +460,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
             caracter = texto.substring(pos, pos + 1);
         }
         textoCarbohidratos.setText(label + ": " + subString + " gramos");
-
+*/
         // PROCESO PROTEINAS
+        exito = this.procesarComponente(texto, this.getResources().getString(R.string.proteinas1), textoProteinas);
+        if(!exito) {
+            this.procesarComponente(texto, this.getResources().getString(R.string.proteinas1), textoProteinas);
+        }
+        /*
         pos = -1;
         subString = "";
         label = this.getResources().getString(R.string.proteinas1);
@@ -455,9 +489,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
             caracter = texto.substring(pos, pos + 1);
         }
         textoProteinas.setText(label + ": " + subString + " gramos");
-
+*/
         // PROCESO LAS GRASAS TOTALES
-            pos = -1;
+        this.procesarComponente(texto, this.getResources().getString(R.string.grasas_totales), textoGrasasTotales);
+
+
+            /*pos = -1;
             subString = "";
             label = this.getResources().getString(R.string.grasas_totales);
             pos = texto.indexOf(label);
@@ -473,9 +510,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 caracter = texto.substring(pos, pos + 1);
             }
             textoGrasasTotales.setText(label + ": " + subString + " gramos");
-
+*/
             // PROCESO LAS GRASAS TRANS
-            pos = -1;
+        this.procesarComponente(texto, this.getResources().getString(R.string.grasas_trans), textoGrasasTrans);
+/*            pos = -1;
             subString = "";
             label = this.getResources().getString(R.string.grasas_trans);
             pos = texto.indexOf(label);
@@ -491,9 +529,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 caracter = texto.substring(pos, pos + 1);
             }
             textoGrasasTrans.setText(label + ": " + subString + " gramos");
-
+*/
             // PROCESO LA FIBRA ALIMENTARIA
-            pos = -1;
+        this.procesarComponente(texto, this.getResources().getString(R.string.fibra_alimentaria), textoFibraAlimentaria);
+/*            pos = -1;
             subString = "";
             label = this.getResources().getString(R.string.fibra_alimentaria);
             pos = texto.indexOf(label);
@@ -510,7 +549,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
             textoFibraAlimentaria.setText(label + ": " + subString + " gramos");
 
-
+*/
         }
 
 /*    private void doOCR (final Bitmap bitmap) {
