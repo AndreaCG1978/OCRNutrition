@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">OCRNutrition</string>
-    <string name="scan_button">ESCANEAR ETIQUETA</string>
+    <string name="scan_button">SCAN LABEL</string>
     <string name="carbohidratos">CARBOHIDRATOS</string>
     <string name="proteinas1">PROTEINAS</string>
     <string name="proteinas2">PROTEÍNAS</string>

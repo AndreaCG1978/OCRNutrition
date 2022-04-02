@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_width="230dp"
+        android:layout_height="200dp"
          />
 
     <Button
@@ -28,13 +28,54 @@
     <TextView
         android:id="@+id/texto"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="220dp"
         android:layout_margin="15dp"
         android:gravity="center"
         android:layout_gravity="center"
         />
 
+    <TextView
+        android:id="@+id/textoCarbohidratos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
 
+    <TextView
+        android:id="@+id/textoProteinas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+
+    <TextView
+        android:id="@+id/textoGrasasTotales"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+    <TextView
+        android:id="@+id/textoGrasasTrans"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
+    <TextView
+        android:id="@+id/textoFibraAlimentaria"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        />
 
 
 

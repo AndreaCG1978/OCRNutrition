@@ -3,17 +3,13 @@ package com.android.knapps.ocrnutrition;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.FileProvider;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -48,7 +44,6 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
@@ -61,11 +56,18 @@ public class MainActivity extends Activity implements View.OnClickListener {
     final int CROP_PIC = 2;
     private Uri picUri;
     TextRecognizer recognizer = null;
+    TextView textoCarbohidratos = null;
+    TextView textoProteinas = null;
+    TextView textoGrasasTotales = null;
+    TextView textoGrasasTrans = null;
+    TextView textoFibraAlimentaria = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        this.configureWidgets();
         iv = findViewById(R.id.imageView);
         txt = findViewById(R.id.texto);
         Button captureBtn = (Button) findViewById(R.id.capture_btn);
@@ -346,6 +348,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 // ...
                                 String temp = visionText.getText();
                                 temp = temp.replace("\n", "");
+                                parsearTexto(MainActivity.this, temp);
                                 txt.setText(temp);
                                 iv.setImageBitmap(bitmap);
                                 mProgressDialog.dismiss();
@@ -382,6 +385,133 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         }).start();*/
     }
+
+    private boolean esNumero(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
+    }
+
+    private void configureWidgets() {
+        textoCarbohidratos = findViewById(R.id.textoCarbohidratos);
+        textoProteinas = findViewById(R.id.textoProteinas);
+        textoFibraAlimentaria = findViewById(R.id.textoFibraAlimentaria);
+        textoGrasasTotales = findViewById(R.id.textoGrasasTotales);
+        textoGrasasTrans = findViewById(R.id.textoGrasasTrans);
+
+    }
+
+
+        private void parsearTexto(MainActivity mainActivity, String temp) {
+        String texto = temp.toUpperCase();
+        String subString = "";
+        String caracter = "";
+        int pos = -1;
+        boolean iterar = true;
+
+        // PROCESO CARBOHIDRATOS
+        String label = this.getResources().getString(R.string.carbohidratos);
+        pos = texto.indexOf(label);
+        pos = pos + label.length();
+
+        caracter = texto.substring(pos, pos + 1);
+        while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+            pos = pos + 1;
+            caracter = texto.substring(pos, pos + 1);
+        }
+        while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+            subString = subString + caracter;
+            pos = pos + 1;
+            caracter = texto.substring(pos, pos + 1);
+        }
+        textoCarbohidratos.setText(label + ": " + subString + " gramos");
+
+        // PROCESO PROTEINAS
+        pos = -1;
+        subString = "";
+        label = this.getResources().getString(R.string.proteinas1);
+        pos = texto.indexOf(label);
+        if(pos == -1){
+            label = this.getResources().getString(R.string.proteinas2);
+            pos = texto.indexOf(label);
+        }
+
+        pos = pos + label.length();
+
+        caracter = texto.substring(pos, pos + 1);
+        while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+            pos = pos + 1;
+            caracter = texto.substring(pos, pos + 1);
+        }
+        while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+            subString = subString + caracter;
+            pos = pos + 1;
+            caracter = texto.substring(pos, pos + 1);
+        }
+        textoProteinas.setText(label + ": " + subString + " gramos");
+
+        // PROCESO LAS GRASAS TOTALES
+            pos = -1;
+            subString = "";
+            label = this.getResources().getString(R.string.grasas_totales);
+            pos = texto.indexOf(label);
+            pos = pos + label.length();
+            caracter = texto.substring(pos, pos + 1);
+            while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+                subString = subString + caracter;
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            textoGrasasTotales.setText(label + ": " + subString + " gramos");
+
+            // PROCESO LAS GRASAS TRANS
+            pos = -1;
+            subString = "";
+            label = this.getResources().getString(R.string.grasas_trans);
+            pos = texto.indexOf(label);
+            pos = pos + label.length();
+            caracter = texto.substring(pos, pos + 1);
+            while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+                subString = subString + caracter;
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            textoGrasasTrans.setText(label + ": " + subString + " gramos");
+
+            // PROCESO LA FIBRA ALIMENTARIA
+            pos = -1;
+            subString = "";
+            label = this.getResources().getString(R.string.fibra_alimentaria);
+            pos = texto.indexOf(label);
+            pos = pos + label.length();
+            caracter = texto.substring(pos, pos + 1);
+            while(caracter.equals(" ") || caracter.equals(":") || caracter.equals("=") ){
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            while(this.esNumero(caracter) || caracter.equals(".") || caracter.equals(",")){
+                subString = subString + caracter;
+                pos = pos + 1;
+                caracter = texto.substring(pos, pos + 1);
+            }
+            textoFibraAlimentaria.setText(label + ": " + subString + " gramos");
+
+
+        }
 
 /*    private void doOCR (final Bitmap bitmap) {
         new Thread(new Runnable() {
