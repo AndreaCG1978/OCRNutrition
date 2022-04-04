@@ -8,4 +8,6 @@
     <string name="grasas_saturadas">GRASAS SATURADAS</string>
     <string name="grasas_trans">GRASAS TRANS</string>
     <string name="fibra_alimentaria">FIBRA ALIMENTARIA</string>
+    <string name="porcion1">PORCION</string>
+    <string name="porcion2">PORCIÓN</string>
 </resources>

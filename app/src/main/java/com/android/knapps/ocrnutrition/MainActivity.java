@@ -61,6 +61,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     TextView textoGrasasTotales = null;
     TextView textoGrasasTrans = null;
     TextView textoFibraAlimentaria = null;
+    TextView textoPorcion = null;
+
 
 
     @Override
@@ -404,6 +406,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         textoFibraAlimentaria = findViewById(R.id.textoFibraAlimentaria);
         textoGrasasTotales = findViewById(R.id.textoGrasasTotales);
         textoGrasasTrans = findViewById(R.id.textoGrasasTrans);
+        textoPorcion = findViewById(R.id.textoPorcion);
 
     }
 
@@ -441,6 +444,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
         String caracter = "";
         int pos = -1;
         boolean exito = true;
+
+        // PROCESO PORCION
+        exito = this.procesarComponente(texto, this.getResources().getString(R.string.porcion1), textoPorcion);
+        if(!exito) {
+            this.procesarComponente(texto, this.getResources().getString(R.string.porcion2), textoPorcion);
+        }
+        exito = true;
 
         // PROCESO CARBOHIDRATOS
         this.procesarComponente(texto, this.getResources().getString(R.string.carbohidratos), textoCarbohidratos);
