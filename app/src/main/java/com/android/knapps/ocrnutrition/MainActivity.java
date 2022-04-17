@@ -349,7 +349,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                                 // Task completed successfully
                                 // ...
                                 String temp = visionText.getText();
-                                temp = temp.replace("\n", "");
+                                temp = temp.replace("\n", " ");
                                 parsearTexto(MainActivity.this, temp);
                                 txt.setText(temp);
                                 iv.setImageBitmap(bitmap);
